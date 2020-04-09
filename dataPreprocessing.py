@@ -126,7 +126,7 @@ bedsPerCounty = np.zeros(countiesNames.shape, dtype=np.double)
 helipadsPerCounty = np.zeros(countiesNames.shape, dtype=np.intc)
 
 #Loop for fetching county wise data from Hospitals
-
+#O(n^2)
 
 
 for n, (county, state)  in enumerate(zip(countiesHolder, statesNames.to_numpy())):
@@ -149,6 +149,7 @@ for n, (county, state)  in enumerate(zip(countiesHolder, statesNames.to_numpy())
 #countiesNames_partial = countiesNames.iloc[:1]
 #statesNames_partial = statesNames.iloc[:1]
 
+#this takes more than an hour because of api limits
 countiesLocs = lib.countyState_to_LatLong(countiesNames, statesNames)
 
 countiesLat = np.zeros(countiesNames.shape, dtype=float)
@@ -171,6 +172,6 @@ dataDict = {
     'LON'         : countiesLon
 }
 
-dataName = './data/CombinedDataset.csv'
+dataName = './data/CountyHospitalCombined.csv'
 
 lib.saveDictAsCSV(dataDict,dataName)
