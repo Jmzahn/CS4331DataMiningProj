@@ -1,3 +1,4 @@
+#only run if CountyHospitalCombined.csv is not yet made, script will take a while.
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
