@@ -8,7 +8,7 @@ import lib
 
 
 Hospitals = lib.loadHospitals()
-USCountyCovidData = lib.loadUSCounties()
+USCountyCovidData = lib.loadUSCountiesCov()
 USCountyPopData = lib.loadCountyPopEst()
 
 #the most important information in Hospitals is COUNTY and BEDS
