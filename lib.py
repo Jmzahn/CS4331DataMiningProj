@@ -12,7 +12,7 @@ def loadHospitals():
     return df
 
 #data from https://github.com/nytimes/covid-19-data
-def loadUSCounties():
+def loadUSCountiesCov():
     df = pd.read_csv('./data/us-counties.csv')
     return df
 
@@ -20,6 +20,10 @@ def loadUSCounties():
 #data from https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/
 def loadCountyPopEst():
     df = pd.read_csv('./data/co-est2019-alldata.csv', encoding='latin-1')
+    return df
+
+def loadCHCombined():
+    df = pd.read_csv('./data/CountyHospitalCombined.csv')
     return df
 
 class Location:#simple class for holding the important location data obtained from Nominatim
