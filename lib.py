@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 import pandas as pd
-from geopy.geocoders import Nominatim
+
 
 
 #data from https://hifld-geoplatform.opendata.arcgis.com/datasets/hospitals
@@ -26,6 +26,10 @@ def loadCHCombined():
     df = pd.read_csv('./data/CountyHospitalCombined.csv')
     return df
 
+def loadCCHTimeSeries():
+    df = pd.read_csv('./data/CovCountyHospitalTimeSeries.csv')
+    return df
+
 class Location:#simple class for holding the important location data obtained from Nominatim
     def __init__(self, name, lat, lon):
         self.name = name
@@ -39,6 +43,7 @@ class Location:#simple class for holding the important location data obtained fr
         self.lon = new_lon
 
 def countyState_to_LatLong(counties, states):
+    from geopy.geocoders import Nominatim
     geolocator = Nominatim(user_agent="schoolResearchCounties")
     locObjList = np.empty(counties.shape, dtype=Location)
 
@@ -60,6 +65,11 @@ def saveDictAsCSV(data_dict, data_name):
     df=pd.DataFrame(data_dict)
     #save dataframe as csv
     df.to_csv(data_name,index=False)
+
+def updateCovCountyHospital():
+    CCH = loadCCHTimeSeries()
+    CountyCov = loadUSCountiesCov()
+    #TODO
 
 stateDict = {
        "AL": "Alabama" 	                                 ,
