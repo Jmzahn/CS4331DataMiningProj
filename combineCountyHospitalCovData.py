@@ -76,8 +76,14 @@ for (c, county, state) in zip(countyIndex, countiesHolder, states):
     Cdates = dates[stateAndCountyMap]
     for (d, date) in zip(datesIndex, dateRange):
         datesMap = Cdates==date
-        cCountyDay[c,d] += np.sum(Ccases[datesMap])
-        dCountyDay[c,d] += np.sum(Cdeaths[datesMap])
+        CcasesTemp = Ccases[datesMap]
+        CdeathsTemp = Cdeaths[datesMap]
+        numCases = np.sum(CcasesTemp) if CcasesTemp.size != 0 else np.intc(0)
+        previousC = cCountyDay[c,d-np.intc(1)] if d != 0 else np.intc(0)
+        numDeaths = np.sum(CdeathsTemp) if CdeathsTemp.size != 0 else np.intc(0)
+        previousD = dCountyDay[c,d-np.intc(1)] if d != 0 else np.intc(0)
+        cCountyDay[c,d] = numCases if numCases >= previousC else previousC
+        dCountyDay[c,d] = numDeaths if numDeaths >= previousD else previousD
 end = time.time()
 ellapsed = end-start
 print('big loop took : ',ellapsed,' seconds')
