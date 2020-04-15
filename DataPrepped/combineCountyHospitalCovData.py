@@ -1,3 +1,4 @@
+#CS4331 Jacob Zahn
 import time
 
 import numpy as np
