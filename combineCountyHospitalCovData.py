@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 import pandas as pd
+import datetime
 
 import lib
 
@@ -19,9 +20,10 @@ dates = np.array(dates, dtype=np.datetime64)
 #make a range of dates so we know current dataset length in days
 dateRange = np.arange(DAYBEFORE, dates[-1], dtype=np.datetime64)
 
-#make lists that are shape (days*county, )
-casesPerCountyPerDay = np.zeros((len(dateRange)*len(CountyHospital)),dtype=np.intc)
-deathsPerCountyPerDay = np.zeros((len(dateRange)*len(CountyHospital)),dtype=np.intc)
+#make ndarrays that are shape (county, days since day zero), and contain zeros
+cCountyDay = np.zeros((len(CountyHospital),len(dateRange)),dtype=np.intc)
+dCountyDay = np.zeros((len(CountyHospital),len(dateRange)),dtype=np.intc)
+#zeros allow us to choose that if we dont have info about a county yet, we assume they have zero cases
 
 #POPEST2019,BEDS,HELIPADS,NONPROF,PRIVATE,GOVERNM,LAT,LON
 #grab county state from hospital and cov data
@@ -49,87 +51,69 @@ for n, county in enumerate(counties):
         county = county[:-12]
     if(county.endswith(' Parish')):
         county = county[:-7]
+    if(county.endswith(' and')):
+        county = county[:-4]
     countiesHolder[n] = county
-
 
 covCounties = CountyCovData['county'].to_numpy()
 covStates = CountyCovData['state'].to_numpy()
 covCases = CountyCovData['cases'].to_numpy()
 covDeaths = CountyCovData['deaths'].to_numpy()
 
+countyIndex = np.arange(len(countiesHolder), dtype=np.intc)
+datesIndex = np.arange(len(dateRange), dtype=np.intc)
+
+
+county=countiesHolder[204]
+state=states[204]
+#^LA for testing
+
 start = time.time()
-#now we have to make an O(3142^2+n^2) nested loop to fill the cases and deaths lists
-d = np.intc(0)
-while(d<len(dateRange)):
-    date=dateRange[d]
-    c = np.intc(0)
-    while(c<len(countiesHolder)):
-        county = countiesHolder[c]
-        state = states[c]
-        stateAndCountyMap = (covCounties==county)&(covStates==state)
-        cases = covCases[stateAndCountyMap]
-        deaths = covDeaths[stateAndCountyMap]
-        datesMap = dates[stateAndCountyMap]==date
-        cases = np.sum(cases[datesMap])
-        deaths = np.sum(deaths[datesMap])
-        casesPerCountyPerDay[d*3142+c] += cases
-        deathsPerCountyPerDay[d*3142+c] += deaths
-        c += np.intc(1)
-    d += np.intc(1)
+for (c, county, state) in zip(countyIndex, countiesHolder, states):
+    stateAndCountyMap = (covCounties==county)&(covStates==state)
+    Ccases = covCases[stateAndCountyMap]
+    Cdeaths = covDeaths[stateAndCountyMap]
+    Cdates = dates[stateAndCountyMap]
+    for (d, date) in zip(datesIndex, dateRange):
+        datesMap = Cdates==date
+        cCountyDay[c,d] += np.sum(Ccases[datesMap])
+        dCountyDay[c,d] += np.sum(Cdeaths[datesMap])
 end = time.time()
 ellapsed = end-start
 print('big loop took : ',ellapsed,' seconds')
 
-#for d, date in enumerate(dateRange):
-#    for c, (county, state) in enumerate(zip(countiesHolder, states)):
-#        stateAndCountyMap = (covCounties==county)&(covStates==state)
-#        cases = covCases[stateAndCountyMap]
-#        deaths = covDeaths[stateAndCountyMap]
-#        datesMap = dates[stateAndCountyMap]==date
-#        cases = np.sum(cases[datesMap])
-#        deaths = np.sum(deaths[datesMap])
-#        casesPerCountyPerDay[d+c] += cases
-#        deathsPerCountyPerDay[d+c] += deaths
 
-
-
-
-allDatesAllCounties = np.empty((len(dateRange)*len(CountyHospital)),dtype='datetime64[D]')
-
-start = time.time()
-for d, date in enumerate(dateRange):
-    for c in range(len(CountyHospital)):
-        allDatesAllCounties[c+d*3142] = date
-end = time.time()
-ellapsed = end-start
-print('date init loop took : ',ellapsed,' seconds')
-
-allCountiesAllDays      = np.tile(counties, len(dateRange))
-allStatesAllDays        = np.tile(states, len(dateRange))
-allPopulationsAllDays   = np.tile(populations, len(dateRange))
-allBedsAllDays          = np.tile(beds, len(dateRange))
-allHelipadsAllDays      = np.tile(helipads, len(dateRange))
-allNonProfAllDays       = np.tile(nonProf, len(dateRange))
-allPrivateAllDays       = np.tile(private, len(dateRange))
-allGovernmAllDays       = np.tile(governm, len(dateRange))
-allLatAllDays           = np.tile(lat, len(dateRange))
-allLonAllDays           = np.tile(lon, len(dateRange))
-
+#create DataFrame from python dict containing our county and hospital information
 dataDict = {
-        'date'    : allDatesAllCounties   ,
-        'county'    : allCountiesAllDays    ,
-        'state'    : allStatesAllDays      ,
-        'population'    : allPopulationsAllDays ,
-        'beds'    : allBedsAllDays        ,
-        'helipads'    : allHelipadsAllDays    ,
-        'nonProf'    : allNonProfAllDays     ,
-        'private'    : allPrivateAllDays     ,
-        'governm'    : allGovernmAllDays     ,
-        'lat'    : allLatAllDays         ,
-        'lon'    : allLonAllDays         ,
-        'cases'    : casesPerCountyPerDay  ,
-        'deaths'    : deathsPerCountyPerDay 
+        'county'        : counties    ,
+        'state'         : states      ,
+        'population'    : populations ,
+        'beds'          : beds        ,
+        'helipads'      : helipads    ,
+        'nonProf'       : nonProf     ,
+        'private'       : private     ,
+        'governm'       : governm     ,
+        'lat'           : lat         ,
+        'lon'           : lon         
 }
-dataName = './data/CovByCountyHospitalByDates.csv'
+CH = pd.DataFrame(dataDict, index = countyIndex)
 
-lib.saveDictAsCSV(dataDict,dataName)
+#create and populate column names from dates
+cDateRange = np.empty(dateRange.shape,dtype='<U11')
+dDateRange = np.empty(dateRange.shape,dtype='<U11')
+dateRangeDT = np.array([date.astype(datetime.datetime) for date in dateRange])
+dateRangeStr = np.array([date.strftime('%Y-%m-%d') for date in dateRangeDT])
+
+
+for (d, date) in zip(datesIndex, dateRangeStr):
+    cdate = np.unicode_('c')+date
+    ddate = np.unicode_('d')+date
+    cDateRange[d] = cdate
+    dDateRange[d] = ddate
+
+#create DataFrames from cases and deaths
+Cs = pd.DataFrame(cCountyDay, index = countyIndex, columns = cDateRange)
+Ds = pd.DataFrame(dCountyDay, index = countyIndex, columns = dDateRange)
+
+df = pd.concat([CH, Cs, Ds], axis=1)
+df.to_csv('./data/CovCountyHospitalTimeSeries.csv',index=False)
