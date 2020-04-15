@@ -1,4 +1,5 @@
 #library of helper functions
+import os
 import time
 
 import numpy as np
@@ -8,26 +9,26 @@ import pandas as pd
 
 #data from https://hifld-geoplatform.opendata.arcgis.com/datasets/hospitals
 def loadHospitals():
-    df = pd.read_csv('./data/Hospitals.csv')
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/Hospitals.csv')
     return df
 
 #data from https://github.com/nytimes/covid-19-data
 def loadUSCountiesCov():
-    df = pd.read_csv('./data/us-counties.csv')
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/us-counties.csv')
     return df
 
 #data sheet https://www2.census.gov/programs-surveys/popest/technical-documentation/file-layouts/2010-2019/co-est2019-alldata.pdf
 #data from https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/
 def loadCountyPopEst():
-    df = pd.read_csv('./data/co-est2019-alldata.csv', encoding='latin-1')
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/co-est2019-alldata.csv', encoding='latin-1')
     return df
 
 def loadCHCombined():
-    df = pd.read_csv('./data/CountyHospitalCombined.csv')
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/CountyHospitalCombined.csv')
     return df
 
 def loadCCHTimeSeries():
-    df = pd.read_csv('./data/CovCountyHospitalTimeSeries.csv')
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/CovCountyHospitalTimeSeries.csv')
     return df
 
 class Location:#simple class for holding the important location data obtained from Nominatim
