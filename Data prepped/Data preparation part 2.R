@@ -1,5 +1,5 @@
-hospital_data <- read.csv("../data/Hospitals.csv",sep = ",")
-combined_data <- read.csv("../data/CountyHospitalCombined.csv",sep = ",")
+hospital_data <- read.csv("./data/Hospitals.csv",sep = ",")
+combined_data <- read.csv("./data/CountyHospitalCombined.csv",sep = ",")
 
 ##Adding index field to hospital data
 n1 <- dim(hospital_data)[1]
@@ -10,7 +10,7 @@ hospital_data$BEDS[hospital_data$BEDS < 0] <- NA
 hospital_data$POPULATION[hospital_data$POPULATION < 0] <- NA
 hospital_data$TTL_STAFF[hospital_data$TTL_STAFF < 0] <- NA
 ##Writting updated data set
-write.csv(hospital_data,"../data/New_Hospital_data.csv", row.names = FALSE)
+write.csv(hospital_data,"./data/New_Hospital_data.csv", row.names = FALSE)
 
 
 ##Adding index field to combined data
@@ -56,5 +56,5 @@ combined_data_sort_gov[1:15,c(1,3)]
 
 
 ##Writting updated data set
-write.csv(combined_data, "../data/New_CountyHospitalCombined.csv", row.names = FALSE)
+write.csv(combined_data, "./data/New_CountyHospitalCombined.csv", row.names = FALSE)
 
