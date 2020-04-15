@@ -1,6 +1,6 @@
 ##Enrique Cervantes cs 4331
 
-cov_data <- read.csv("us_states_covid19_daily.csv", sep = ",")
+cov_data <- read.csv("../data/us_states_covid19_daily.csv", sep = ",")
 ##Adding Index field 
 n <- dim(cov_data)[1]
 cov_data$Index <- c(1:n)
@@ -48,4 +48,4 @@ cov_data_sort_results[1:15, c(1,3)]
 
 
 ##write updated csv file
-write.csv(cov_data,"new_us_states_covid19_daily.csv",row.names = FALSE)
+write.csv(cov_data,"../data/new_us_states_covid19_daily.csv",row.names = FALSE)
