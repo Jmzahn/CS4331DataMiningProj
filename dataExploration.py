@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 import lib
 
@@ -15,6 +16,9 @@ private = CCH['private'].to_numpy()
 governm = CCH['governm'].to_numpy()
 totalHosp = nonProf + private + governm
 casesLast= CCH['c2020-04-12'].to_numpy()
+
+bedsZ = stats.zscore(beds)
+populationZ = stats.zscore(population)
 
 plt.figure()
 plt.scatter(population,casesLast)
@@ -96,5 +100,17 @@ plt.scatter(totalHosp/population,casesLast)
 plt.title('Hospitals per person vs cases')
 plt.xlabel('Hospitals per person')
 plt.ylabel('Cases')
+
+plt.figure()
+plt.scatter(bedsZ,casesLast)
+plt.title('casesLast vs beds')
+plt.xlabel('County hospital beds Z')
+plt.ylabel('County cases')
+
+plt.figure()
+plt.scatter(populationZ,bedsZ, c=casesLast, cmap=matplotlib.cm.cool)
+plt.title('beds vs population, colored by cases')
+plt.xlabel('County population Z')
+plt.ylabel('County hospital beds Z')
 
 plt.show()
