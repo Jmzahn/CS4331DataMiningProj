@@ -1,10 +1,13 @@
 #only run if CountyHospitalCombined.csv is not yet made, script will take a while.
+#CS4331 Jacob Zahn
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+sys.path.append('..')
 import lib
-
 
 
 Hospitals = lib.loadHospitals()
