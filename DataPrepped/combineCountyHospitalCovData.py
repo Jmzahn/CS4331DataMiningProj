@@ -1,10 +1,12 @@
 #CS4331 Jacob Zahn
+import sys
 import time
 
 import numpy as np
 import pandas as pd
 import datetime
 
+sys.path.append('..')
 import lib
 
 #load new dataset 
@@ -19,7 +21,7 @@ dates = CountyCovData['date']
 dates = np.array(dates, dtype=np.datetime64)
 
 #make a range of dates so we know current dataset length in days
-dateRange = np.arange(DAYBEFORE, dates[-1], dtype=np.datetime64)
+dateRange = np.arange(DAYBEFORE, dates[-1]+np.timedelta64(1,'D'), dtype=np.datetime64)
 
 #make ndarrays that are shape (county, days since day zero), and contain zeros
 cCountyDay = np.zeros((len(CountyHospital),len(dateRange)),dtype=np.intc)
@@ -123,4 +125,4 @@ Cs = pd.DataFrame(cCountyDay, index = countyIndex, columns = cDateRange)
 Ds = pd.DataFrame(dCountyDay, index = countyIndex, columns = dDateRange)
 
 df = pd.concat([CH, Cs, Ds], axis=1)
-df.to_csv('./data/CovCountyHospitalTimeSeries.csv',index=False)
+df.to_csv('../data/CovCountyHospitalTimeSeries.csv',index=False)
