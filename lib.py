@@ -31,6 +31,10 @@ def loadCCHTimeSeries():
     df = pd.read_csv(os.path.dirname(__file__)+'/data/CovCountyHospitalTimeSeries.csv')
     return df
 
+def loadDailyStateTesting():
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/new_daily.csv')
+    return df
+
 class Location:#simple class for holding the important location data obtained from Nominatim
     def __init__(self, name, lat, lon):
         self.name = name
@@ -66,11 +70,6 @@ def saveDictAsCSV(data_dict, data_name):
     df=pd.DataFrame(data_dict)
     #save dataframe as csv
     df.to_csv(data_name,index=False)
-
-def updateCovCountyHospital():
-    CCH = loadCCHTimeSeries()
-    CountyCov = loadUSCountiesCov()
-    #TODO
 
 stateDict = {
        "AL": "Alabama" 	                                 ,
