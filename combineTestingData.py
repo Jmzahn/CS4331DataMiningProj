@@ -46,15 +46,25 @@ dst_tests = DST['totalTestResults'].to_numpy()
 dst_pos = DST['positive'].to_numpy()
 dst_neg = DST['negative'].to_numpy()
 
+#retrieve neccessary itterables from CCHTS
+countyPop = CCHTS['population'].to_numpy()
+countyState = CCHTS['state']
+
 #create list of 51 states+dc postal codes
 states = np.array(list(lib.stateDict.keys()))
 removeStatesMask = ~np.isin(states,np.array(['AS','GU','MP','PR','VI','UM','FM','MH','PW','AA','AE','AP','CM','PZ','NB','PH','PC']))
 states = states[removeStatesMask]
 
+#get full state names
+statesExp = np.array([lib.stateDict[stateCode] for stateCode in states])
+
 #create zero filled holder matrix for daily state testing
 tStateDay = np.zeros((len(states), len(tDateRange)), dtype=np.intc)
 pStateDay = np.zeros((len(states), len(tDateRange)), dtype=np.intc)
 nStateDay = np.zeros((len(states), len(tDateRange)), dtype=np.intc)
+
+#create zero filled holder for cummulative state population
+statePop = np.zeros((len(states)), dtype=np.intc)
 
 #create indeces for traversing xStateDays
 statesIndex = np.arange(len(states), dtype=np.intc)
@@ -67,6 +77,8 @@ for (s, state) in zip(statesIndex, states):
     state_pos = dst_pos[stateMask]
     state_neg = dst_neg[stateMask]
     state_dates = dst_dates[stateMask]
+    stateMask = countyState==statesExp[s]
+    statePop[s] += np.sum(countyPop[stateMask])
     for (d, date) in zip(datesIndex, tDateRange):
         dateMap = state_dates==date
         sTestsTemp = state_tests[dateMap]
@@ -100,11 +112,12 @@ for (d, date) in zip(datesIndex, dateRangeStr):
     pDateRangeStr[d] = pdate
     nDateRangeStr[d] = ndate
 
-#get full state names
-statesExp = np.array([lib.stateDict[stateCode] for stateCode in states])
 
 #create dataframes
-dataDict = {'state': statesExp}
+dataDict = {
+    'state' : statesExp,
+    'population' : statePop
+}
 Ss = pd.DataFrame(dataDict, index = statesIndex)
 Ts = pd.DataFrame(tStateDay, index = statesIndex, columns = tDateRangeStr)
 Ps = pd.DataFrame(pStateDay, index = statesIndex, columns = pDateRangeStr)
