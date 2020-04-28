@@ -88,8 +88,8 @@ for (s, state) in zip(statesIndex, states):
         numP = np.sum(sPosTemp) if sPosTemp.size != 0 else np.intc(0)
         numN = np.sum(sNegTemp) if sNegTemp.size != 0 else np.intc(0)
         prevT = tStateDay[s, d-np.intc(1)] if d != np.intc(0) else np.intc(0)
-        prevP = tStateDay[s, d-np.intc(1)] if d != np.intc(0) else np.intc(0)
-        prevN = tStateDay[s, d-np.intc(1)] if d != np.intc(0) else np.intc(0)
+        prevP = pStateDay[s, d-np.intc(1)] if d != np.intc(0) else np.intc(0)
+        prevN = nStateDay[s, d-np.intc(1)] if d != np.intc(0) else np.intc(0)
         tStateDay[s,d] = numT if numT >= prevT else prevT
         pStateDay[s,d] = numP if numP >= prevP else prevP
         nStateDay[s,d] = numN if numN >= prevN else prevN
