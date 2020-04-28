@@ -10,6 +10,8 @@ CCHTS = lib.loadCCHTimeSeries()
 CC = lib.loadUSCountiesCov()
 DST = lib.loadDailyStateTesting()
 
+#get date data
+
 DAYBEFORE = '2020-01-20'
 DAYBEFORE = np.datetime64(DAYBEFORE)
 CCdates = CC['date']
@@ -19,7 +21,6 @@ CCdateRange = np.arange(DAYBEFORE, CCdates[-1]+np.timedelta64(1,'D'), dtype='dat
 CCHTS_startDate = np.datetime64(((CCHTS.columns).to_numpy()[10])[-10:])
 CCHTS_endDate = np.datetime64(((CCHTS.columns).to_numpy()[-1])[-10:])
 CCHTSdateRange = np.arange(CCHTS_startDate, CCHTS_endDate+np.timedelta64(1,'D'), dtype='datetime64[D]')
-
 
 dst_dates = DST['date'].to_numpy()
 dst_dates = np.array([ pd.to_datetime(str(date), format='%Y%m%d') for date in dst_dates], dtype='datetime64[D]')
@@ -84,7 +85,6 @@ end = time.time()
 ellapsed = end-start
 print('big loop took : ',ellapsed,' seconds')
 
-
 #create and populate column names from dates
 tDateRangeStr = np.empty(tDateRange.shape,dtype='<U11')
 pDateRangeStr = np.empty(tDateRange.shape,dtype='<U11')
@@ -100,14 +100,16 @@ for (d, date) in zip(datesIndex, dateRangeStr):
     pDateRangeStr[d] = pdate
     nDateRangeStr[d] = ndate
 
+#get full state names
 statesExp = np.array([lib.stateDict[stateCode] for stateCode in states])
 
+#create dataframes
 dataDict = {'state': statesExp}
 Ss = pd.DataFrame(dataDict, index = statesIndex)
 Ts = pd.DataFrame(tStateDay, index = statesIndex, columns = tDateRangeStr)
 Ps = pd.DataFrame(pStateDay, index = statesIndex, columns = pDateRangeStr)
 Ns = pd.DataFrame(nStateDay, index = statesIndex, columns = nDateRangeStr)
 
-
+#save
 df = pd.concat([Ss, Ts, Ps, Ns], axis = 1)
 df.to_csv('./data/StateTestingTimeSeries.csv', index = False)
