@@ -5,6 +5,7 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 
+import lib
 
 class Model:
     modelFile = 'model.h5'
@@ -17,8 +18,23 @@ class Model:
 
         else:
             # instantiate and train model
+            features, targets, validate_features, validate_targets = lib.loadNNData()
+            train_data_multi = tf.data.Dataset.from_tensor_slices((features, targets))
+            val_data_multi = tf.data.Dataset.from_tensor_slices((validate_features, validate_targets))
+            train_data_multi = train_data_multi.cache().shuffle(10000).batch(3142).repeat()
+            val_data_multi = val_data_multi.batch(3142).repeat()
             print('Instantiating neural network...')
-            #TODO
+            self.model = keras.models.Sequential()
+            self.model.add(keras.layers.CuDNNLSTM(7, return_sequences=True, input_shape = features.shape[-2:], time_major=True))
+            self.model.add(keras.layers.CuDNNLSTM(7, return_sequences=True))
+            self.model.add(tf.keras.layers.Dense((targets.shape[-1])))
+            self.model.summary()
+            print('Compiling neural network...')
+            self.model.compile(optimizer='adam', loss='mean_absolute_error')
+            print('Training Neural network...')
+            self.model.fit(train_data_multi, epochs=10, steps_per_epoch=77, validation_data=val_data_multi, validation_steps=21)
+            if save:
+                self.save()
     
     # load model from file
     def load(self):
