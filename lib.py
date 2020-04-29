@@ -39,6 +39,10 @@ def loadSTTS():
     df = pd.read_csv(os.path.dirname(__file__)+'/data/StateTestingTimeSeries.csv')
     return df
 
+def loadMTS():
+    df = pd.read_csv(os.path.dirname(__file__)+'/data/MasterTimeSeries.csv.gz')
+    return df
+
 class Location:#simple class for holding the important location data obtained from Nominatim
     def __init__(self, name, lat, lon):
         self.name = name
