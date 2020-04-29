@@ -43,6 +43,34 @@ def loadMTS():
     df = pd.read_csv(os.path.dirname(__file__)+'/data/MasterTimeSeries.csv.gz')
     return df
 
+def loadNNData():
+    MTS = loadMTS()
+    #only grab this many rows : 307916
+    MTS = MTS.head(307916)
+    TRAIN_SPLIT = 77
+    TRAIN_weeks = 11
+    VAL_weeks = 3
+    BATCH_SIZE = 3142
+    
+    #get date info
+    dates = MTS['date'].values
+    dateStart = np.datetime64(dates[0])
+    dateEnd = np.datetime64(dates[-1])
+    dateRange = np.arange(dateStart, dateEnd+np.timedelta64(1,'D'), dtype='datetime64[D]')
+    days = len(dateRange)
+
+    #grab feature and target data
+    featuresNames = ['beds', 'helipads', 'nonProf', 'private', 'governm', 'tests', 'positive', 'negative']
+    features = MTS[featuresNames].values.reshape((days, BATCH_SIZE, len(featuresNames)))
+    targetsNames = ['cases']
+    targets = MTS[targetsNames].values.reshape((days, BATCH_SIZE, len(targetsNames)))
+
+    validate_features = features[TRAIN_SPLIT:].reshape(VAL_weeks*7, BATCH_SIZE, len(featuresNames))
+    validate_targets = targets[TRAIN_SPLIT:].reshape(VAL_weeks*7, BATCH_SIZE, len(targetsNames))
+    features = features[:TRAIN_SPLIT].reshape(TRAIN_weeks*7, BATCH_SIZE, len(featuresNames))
+    targets = targets[:TRAIN_SPLIT].reshape(TRAIN_weeks*7, BATCH_SIZE, len(targetsNames))
+    return features, targets, validate_features, validate_targets
+
 class Location:#simple class for holding the important location data obtained from Nominatim
     def __init__(self, name, lat, lon):
         self.name = name
