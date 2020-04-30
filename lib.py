@@ -44,14 +44,17 @@ def loadMTS():
     return df
 
 def loadNNData():
+    #from sklearn.preprocessing import normalize
     MTS = loadMTS()
     #only grab this many rows : 307916
     MTS = MTS.head(307916)
-    TRAIN_SPLIT = 77
-    TRAIN_weeks = 11
-    VAL_weeks = 3
-    BATCH_SIZE = 3142
-    
+    Weeks=14
+    Jump = 6
+    TRAIN_weeks = 12-Jump
+    VAL_weeks = Weeks-TRAIN_weeks-Jump
+    COUNTIES = 3142
+    TRAIN_SPLIT = Jump*COUNTIES*7+TRAIN_weeks*COUNTIES*7
+
     #get date info
     dates = MTS['date'].values
     dateStart = np.datetime64(dates[0])
@@ -60,16 +63,17 @@ def loadNNData():
     days = len(dateRange)
 
     #grab feature and target data
-    featuresNames = ['beds', 'helipads', 'nonProf', 'private', 'governm', 'tests', 'positive', 'negative']
-    features = MTS[featuresNames].values.reshape((days, BATCH_SIZE, len(featuresNames)))
+    featuresNames = ['beds', 'helipads', 'nonProf', 'private', 'governm', 'tests']
+    features = MTS[featuresNames].to_numpy()
     targetsNames = ['cases']
-    targets = MTS[targetsNames].values.reshape((days, BATCH_SIZE, len(targetsNames)))
+    targets = MTS[targetsNames].to_numpy()
 
-    validate_features = features[TRAIN_SPLIT:].reshape(VAL_weeks*7, BATCH_SIZE, len(featuresNames))
-    validate_targets = targets[TRAIN_SPLIT:].reshape(VAL_weeks*7, BATCH_SIZE, len(targetsNames))
-    features = features[:TRAIN_SPLIT].reshape(TRAIN_weeks*7, BATCH_SIZE, len(featuresNames))
-    targets = targets[:TRAIN_SPLIT].reshape(TRAIN_weeks*7, BATCH_SIZE, len(targetsNames))
-    return features, targets, validate_features, validate_targets
+    validate_features = features[TRAIN_SPLIT:].reshape(VAL_weeks*7,COUNTIES, len(featuresNames))
+    validate_targets = targets[TRAIN_SPLIT:].reshape(VAL_weeks*7,COUNTIES, len(targetsNames))
+    features = features[Jump*COUNTIES*7:TRAIN_SPLIT].reshape(TRAIN_weeks*7,COUNTIES, len(featuresNames))
+    targets = targets[Jump*COUNTIES*7:TRAIN_SPLIT].reshape(TRAIN_weeks*7,COUNTIES, len(targetsNames))
+    
+    return features, targets, validate_features, validate_targets, dateRange   
 
 class Location:#simple class for holding the important location data obtained from Nominatim
     def __init__(self, name, lat, lon):
@@ -106,6 +110,24 @@ def saveDictAsCSV(data_dict, data_name):
     df=pd.DataFrame(data_dict)
     #save dataframe as csv
     df.to_csv(data_name,index=False)
+
+def plotPreds(countyHistory, countyFuture, predictions):
+    import matplotlib.pyplot as plt
+    histIndex = np.arange(len(countyHistory))
+    futureIndex = np.arange(len(countyHistory),len(countyHistory)+len(countyFuture))
+    predIndex = np.arange(len(countyHistory),len(countyHistory)+len(predictions))
+    lastHeight=countyHistory[-1]
+    for pred in predictions:
+        pred+=lastHeight
+    
+    plt.figure()
+    plt.plot(histIndex, countyHistory, 'b--', label='History')
+    plt.plot(futureIndex, countyFuture, 'b:', label='Future')
+    plt.plot(predIndex, predictions, 'r:', label='Prediction')
+    plt.ylabel('Cases as proportion of Pop')
+    plt.xlabel('Time')
+    plt.legend(loc='upper left')
+    plt.show()
 
 stateDict = {
         "AL": "Alabama" 	                                 ,
