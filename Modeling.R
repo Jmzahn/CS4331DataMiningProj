@@ -101,7 +101,7 @@ model %>% compile(
 
 summary(model)
 
-nb_epoch = Epochs   
+nb_epoch = 600   
 for(i in 1:nb_epoch ){
   model %>% fit(x_train, y_train, epochs=1, batch_size=batch_size, verbose=1, shuffle=FALSE)
   model %>% reset_states()
